@@ -1,14 +1,53 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://unpkg.com/ml5@1/dist/ml5.js"></script>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BSL Gesture Game</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; }
+    video { border: 2px solid black; width: 70%; margin: 20px auto; }
+    #game-text { font-size: 1.5em; margin-top: 20px; }
+  </style>
 </head>
 <body>
-    <script src="https://unpkg.com/ml5@1/dist/ml5.js"></script>
+  <h1>BSL Gesture Game</h1>
+  <video id="webcam" autoplay></video>
+  <p id="game-text">Make the gesture: <span id="target-gesture">Open Palm</span></p>
+  <p id="result-text">Your gesture: <span id="user-gesture">Waiting...</span></p>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script>
+    const video = document.getElementById("webcam");
+    const targetGesture = document.getElementById("target-gesture");
+    const userGesture = document.getElementById("user-gesture");
 
-    
+    const socket = io(); // Connect to the Flask server
+
+    // Access webcam
+    navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+      video.srcObject = stream;
+
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      setInterval(() => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL("image/jpeg");
+        socket.emit("image", imageData); // Send webcam frame to server
+      }, 100); // Send frame every 100ms
+    });
+
+    // Receive gesture recognition results
+    socket.on("gesture", (data) => {
+      userGesture.textContent = data.gesture;
+      if (data.gesture === targetGesture.textContent) {
+        userGesture.style.color = "green";
+      } else {
+        userGesture.style.color = "red";
+      }
+    });
+  </script>
 </body>
 </html>
