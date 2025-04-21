@@ -1,6 +1,5 @@
 import * as handPoseDetection from '@tensorflow-models/hand-pose-detection';
 
-
 const model = handPoseDetection.SupportedModels.MediaPipeHands;
 const detectorConfig = {
   runtime: 'mediapipe', // or 'tfjs'
@@ -10,6 +9,9 @@ detector = await handPoseDetection.createDetector(model, detectorConfig);
 
 const video = document.getElementById('video');
 const hands = await detector.estimateHands(video);
+
+
+// via https://blog.tensorflow.org/2021/11/3D-handpose.html
 
 
 //    shape of output:
